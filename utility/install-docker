@@ -1,0 +1,28 @@
+#!/bin/bash
+
+## local variables
+DOCKER_VERSION="$1"
+
+if ! command -v docker &>/dev/null && docker --version | grep -q"$DOCKER_VERSION";
+then
+    if uname -a | grep Ubuntu;
+    then
+        sudo apt-get -y install apt-transport-https \
+            ca-certificates \
+            curl \
+            software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository \
+            "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        sudo apt-get -y update
+        sudo apt-get -y install docker-ce="$DOCKER_VERSION"
+    else
+        sudo yum install -y yum-utils \
+            device-mapper-persistent-data \
+            lvm2
+        sudo yum-config-manager \
+            --add-repo \
+            https://download.docker.com/linux/centos/docker-ce.repo
+        sudo yum install "docker-ce-${DOCKER_VERSION}"
+    fi
+fi
