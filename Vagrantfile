@@ -47,6 +47,7 @@ servers=[
 Vagrant.configure(2) do |config|
     servers.each do |machine|
         config.vm.define machine[:hostname] do |node|
+            ## virtualbox configurations
             node.vm.box = machine[:box]
             node.vm.hostname = machine[:hostname]
             node.vm.network 'private_network', ip: machine[:ip]
@@ -54,6 +55,7 @@ Vagrant.configure(2) do |config|
                 vb.customize ['modifyvm', :id, '--memory', machine[:ram]]
             end
 
+            ## pre-docker dependencies
             if machine[:hostname] = 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo yum install -y dos2unix
@@ -64,6 +66,7 @@ Vagrant.configure(2) do |config|
                 SHELL
             end
 
+            ## utility executable + install docker
             node.vm.provision 'shell', inline: <<-SHELL
                 dos2unix "#{project_root}"/utility/*
                 chmod u+x "#{project_root}"/utility/*
