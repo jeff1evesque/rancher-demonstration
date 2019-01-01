@@ -36,7 +36,7 @@ servers=[
   },
   {
     :hostname => 'rancher-agent',
-    :ip => '192.168.0.30',
+    :ip => '192.168.0.31',
     :box => 'ubuntu/bionic64',
     :ram => 2048,
     :cpu => 4
