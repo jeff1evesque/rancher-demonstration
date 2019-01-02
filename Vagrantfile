@@ -88,7 +88,7 @@ Vagrant.configure(2) do |config|
 
             else
                 node.vm.provision 'shell', inline: <<-SHELL
-                    ./install-rancher-agent #{_version}
+                    ./install-rancher-agent #{agent_version}
                 SHELL
             end
         end
