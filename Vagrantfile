@@ -34,14 +34,14 @@ end
 servers=[
   {
     :hostname => 'rancher-server',
-    :ip => $server_ip,
+    :ip => server_ip,
     :box => 'centos/7',
     :ram => 3072,
     :cpu => 4
   },
   {
     :hostname => 'rancher-agent',
-    :ip => $agent_ip,
+    :ip => agent_ip,
     :box => 'ubuntu/bionic64',
     :ram => 2048,
     :cpu => 4
