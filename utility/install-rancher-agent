@@ -4,17 +4,18 @@
 AGENT_VERSION="$1"
 SERVER_IP = $(<rancher_ip.txt)
 SLEEP_TIME='300'
+OPERATING_SYSTEM=$(uname -s)
 
 ## detect os
 case "${OPERATING_SYSTEM}" in
     Linux*)
-        DISTRO_TYPE='linux'
+        DISTRO_TYPE='linux';;
     Darwin*)
-        DISTRO_TYPE='unix'
+        DISTRO_TYPE='unix';;
     CYGWIN*)
-        DISTRO_TYPE='windows'
+        DISTRO_TYPE='windows';;
     MINGW*)
-        DISTRO_TYPE='windows'
+        DISTRO_TYPE='windows';;
     *)
         echo ''
         echo 'Error: operating system not known, please open an issue:'

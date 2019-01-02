@@ -5,6 +5,7 @@ RANCHER_CLI_VERSION='v0.6.11'
 RANCHER_AGENT_VERSION='v1.2.10'
 RANCHER_SERVER_VERSION='v1.6.22'
 RANCHER_REPO='https://github.com/rancher/cli'
+OPERATING_SYSTEM=$(uname -s)
 
 case "${OPERATING_SYSTEM}" in
     Linux*)
