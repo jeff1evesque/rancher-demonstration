@@ -8,9 +8,14 @@
 ##
 ##       required_plugins = %w(plugin1 plugin2 plugin3)
 ##
-required_plugins  = %w(vagrant-vbguest)
-plugin_installed  = false
-project_root      = '/vagrant'
+required_plugins = %w(vagrant-vbguest)
+plugin_installed = false
+project_root     = '/vagrant'
+agent_version    = 'v1.2.10'
+server_version   = 'v2.1.4'
+docker_version   = '18.09.0'
+server_ip        = '192.168.0.30'
+agent_ip         = '192.168.0.31'
 
 ## install vagrant plugins
 required_plugins.each do |plugin|
@@ -29,14 +34,14 @@ end
 servers=[
   {
     :hostname => 'rancher-server',
-    :ip => '192.168.0.30',
+    :ip => $server_ip,
     :box => 'centos/7',
     :ram => 3072,
     :cpu => 4
   },
   {
     :hostname => 'rancher-agent',
-    :ip => '192.168.0.31',
+    :ip => $agent_ip,
     :box => 'ubuntu/bionic64',
     :ram => 2048,
     :cpu => 4
@@ -71,8 +76,23 @@ Vagrant.configure(2) do |config|
                 dos2unix "#{project_root}"/utility/*
                 chmod u+x "#{project_root}"/utility/*
                 cd "#{project_root}"/utility
-                ./install-docker '18.03.0'
+                ./install-docker #{docker_version}
             SHELL
+
+            ## install rancher-cli
+            ./install-rancher-cli
+
+            ## install rancher server + agent
+            if machine[:hostname] = 'rancher-server'
+                node.vm.provision 'shell', inline: <<-SHELL
+                    ./install-rancher-server #{server_version}
+                SHELL
+
+            else
+                node.vm.provision 'shell', inline: <<-SHELL
+                    ./install-rancher-agent #{agent_version}
+                SHELL
+            end
         end
     end
 end
