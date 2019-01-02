@@ -1,0 +1,176 @@
+#!/bin/bash
+
+## local variables
+AGENT_VERSION="$1"
+SERVER_IP = $(<rancher_ip.txt)
+SLEEP_TIME='300'
+
+## detect os
+case "${OPERATING_SYSTEM}" in
+    Linux*)
+        DISTRO_TYPE='linux'
+    Darwin*)
+        DISTRO_TYPE='unix'
+    CYGWIN*)
+        DISTRO_TYPE='windows'
+    MINGW*)
+        DISTRO_TYPE='windows'
+    *)
+        echo ''
+        echo 'Error: operating system not known, please open an issue:'
+        echo ''
+        echo 'https://github.com/jeff1evesque/machine-learning/issues/new'
+        echo ''
+        exit 1
+esac
+
+##
+## error detection: capture error then exit
+##
+## Note: this was intended to target the below 'ACCESS=$(...) && break'.
+##
+set -e
+
+SLEEPER=0
+while true
+do
+    ## generate access + secret key:
+    ##
+    ## Note: exporting environment eliminates the need to explicitly provide
+    ##       environment variable to the 'rancher' command.
+    ##
+    ## Note: 'curl' response for ACCESS is json:
+    ##
+    ##     https://github.com/rancher/rancher/issues/4961#issuecomment-222598633
+    ##
+    export RANCHER_URL="http://$SERVER_IP:$RANCHER_PORT"
+
+    ## access rancher server
+    ACCESS=$(
+        curl -v -XPOST -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -d '{
+            "type":"apikey",
+            "accountId":"1a1",
+            "name":"admin",
+            "description":null,
+            "created":null,
+            "kind":null,
+            "removed":null,
+            "uuid":null
+        }' \
+        "$RANCHER_URL"/v2-beta/apikeys
+    ) && break
+
+    if [ "$SLEEPER" = "$SLEEP_TIME" ]; then
+        echo -e "\nSleep time ${SLEEP_TIME}s exceeded, install terminating.\n"
+        exit 1
+    fi
+done
+
+##
+## discontinue error detection
+##
+set +e
+
+if [ "$ACCESS" ]; then
+    SLEEPER=0
+    STATE='registering'
+
+    ## post method creates new resource
+    curl -v -XPOST -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        "$RANCHER_URL"/v2-beta/projects/1a5/registrationTokens
+
+    while true
+    do
+        REGISTER=$(
+            curl -v -H 'Accept: application/json' \
+            -H 'Content-Type: application/json' \
+            "$RANCHER_URL"/v2-beta/projects/1a5/registrationTokens
+        )
+
+        STATE=$(echo "$REGISTER" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["data"][0]["state"])')
+
+        if [ "${STATE,,}" = 'active' ]; then
+            TOKEN=$(echo "$REGISTER" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["data"][0]["token"])')
+            break
+
+        elif [ "$SLEEPER" = 60 ]; then
+            echo ''
+            echo 'Waited over 60s for active state.'
+            echo ''
+            echo '[Y]: yes, keep waiting'
+            echo '[N]: no, exit installation'
+            echo ''
+            read -rp 'Choice: ' TOKEN_STATUS
+
+            if [ "${TOKEN_STATUS,,}" = 'n' ]; then
+                exit 1
+            else
+                SLEEPER=$((SLEEPER+2))
+                sleep 2
+            fi
+
+        else
+            SLEEPER=$((SLEEPER+2))
+            sleep 2
+        fi
+    done
+fi
+
+## @environment: must contain user account id:
+##
+##     - 1a1, administrator
+##     - 1a5, default environment
+##
+## Note: rancher host registration can "also" be validated against:
+##
+##     - $RANCHER_URL/env/1a5/infra/hosts/add?driver=custom
+##
+echo "{
+    \"accessKey\":\"$RANCHER_ACCESS_KEY\",
+    \"secretKey\":\"$RANCHER_SECRET_KEY\",
+    \"url\":\"$RANCHER_URL\",
+    \"environment\":\"1a5\"
+}" > ~/.rancher/cli.json
+
+if [ "$TOKEN" ]; then
+    ## rancher agent: legacy docker toolbox requires older 'boot2docker'.
+    ##
+    ##     - https://github.com/rancher/rancher/issues/10970#issuecomment-372061736
+    ##     - https://github.com/jeff1evesque/machine-learning/issues/2935#issuecomment-372060078
+    ##     - https://github.com/jeff1evesque/machine-learning/issues/2935#issuecomment-372061391
+    ##
+    if [ "$DISTRO_TYPE" = 'windows' ] && [ "$WINDOWS_CURRENT_VERSION" -le "$WINDOWS_VERSION" ]; then
+        docker-machine \
+            create \
+            -d virtualbox \
+            --virtualbox-boot2docker-url="$BOOT2DOCKER_REPO"/releases/download/v17.09.1-ce/boot2docker.iso \
+            rancher
+
+        docker-machine.exe env rancher
+        eval "$('C:\Program Files\Docker Toolbox\docker-machine.exe' env rancher)"
+    fi
+
+    ## create docker volumes
+    mkdir -p ./interface/static/{js,css}
+
+    ## register host with rancher
+    docker run \
+        --rm \
+        --privileged \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /var/lib/rancher:/var/lib/rancher \
+        rancher/agent:"$AGENT_VERSION" \
+        "$RANCHER_URL/v1/scripts/$TOKEN"
+
+else
+    echo 'rancher registration token not generated'
+    exit 1
+fi
+
+else
+    echo 'please install docker per https://github.com/jeff1evesque/machine-learning#installation'
+    exit 1
+fi
