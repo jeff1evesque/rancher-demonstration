@@ -158,7 +158,7 @@ if [ "$TOKEN" ]; then
     mkdir -p ./interface/static/{js,css}
 
     ## register host with rancher
-    docker run \
+    sudo docker run \
         --rm \
         --privileged \
         -v /var/run/docker.sock:/var/run/docker.sock \

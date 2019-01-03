@@ -25,7 +25,7 @@ case "${OPERATING_SYSTEM}" in
 esac
 
 ## install rancher server
-docker run -d \
+sudo docker run -d \
     --name "$RANCHER_CONTAINER" \
     --restart=unless-stopped \
     -p 8080:8080 \
