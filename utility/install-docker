@@ -3,6 +3,7 @@
 ## local variables
 DOCKER_VERSION="$1"
 
+## install docker
 if [ ! -x "$(command -v docker)" ];
 then
     if uname -a | grep Ubuntu;
@@ -26,3 +27,7 @@ then
         sudo yum install -y "docker-ce-${DOCKER_VERSION}"
     fi
 fi
+
+## ensure docker started
+sudo service docker start
+sudo systemctl start docker
