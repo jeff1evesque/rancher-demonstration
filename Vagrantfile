@@ -61,7 +61,8 @@ Vagrant.configure(2) do |config|
             end
 
             ## pre-docker dependencies
-            if machine[:hostname] = 'rancher-server'
+            if machine[:hostname] == 'rancher-server'
+                node.vm.network 'forwarded_port', guest: 8080, host: 7890
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo yum install -y dos2unix
                 SHELL
@@ -81,7 +82,7 @@ Vagrant.configure(2) do |config|
             SHELL
 
             ## install rancher server + agent
-            if machine[:hostname] = 'rancher-server'
+            if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
                     cd "#{project_root}"/utility
                     ./install-rancher-server #{server_version}
