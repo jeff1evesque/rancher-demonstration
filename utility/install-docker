@@ -3,7 +3,7 @@
 ## local variables
 DOCKER_VERSION="$1"
 
-if command -v docker &>/dev/null && docker --version | grep -vq "$DOCKER_VERSION";
+if [ ! -x "$(command -v docker)" ];
 then
     if uname -a | grep Ubuntu;
     then
@@ -23,6 +23,6 @@ then
         sudo yum-config-manager \
             --add-repo \
             https://download.docker.com/linux/centos/docker-ce.repo
-        sudo yum install "docker-ce-${DOCKER_VERSION}"
+        sudo yum install -y "docker-ce-${DOCKER_VERSION}"
     fi
 fi
