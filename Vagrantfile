@@ -11,8 +11,8 @@
 required_plugins = %w(vagrant-vbguest)
 plugin_installed = false
 project_root     = '/vagrant'
-agent_version    = 'v1.2.10'
-server_version   = 'v2.1.4'
+agent_version    = 'v1.2.11'
+server_version   = 'v1.6.25'
 docker_version   = '18.09.0'
 server_ip        = '192.168.0.30'
 agent_ip         = '192.168.0.31'
