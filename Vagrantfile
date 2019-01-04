@@ -61,6 +61,10 @@ Vagrant.configure(2) do |config|
                 vb.customize ['modifyvm', :id, '--memory', machine[:ram]]
             end
 
+            ## shared files + folders
+            node.vm.synced_folder './', '/vagrant',
+                mount_options: ['dmode=755', 'fmode=664']
+
             ## pre-docker dependencies
             if machine[:hostname] == 'rancher-server'
                 node.vm.network 'forwarded_port', guest: 8080, host: server_port
@@ -86,13 +90,13 @@ Vagrant.configure(2) do |config|
             if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
                     cd "#{project_root}"/utility
-                    ./install-rancher-server #{server_version}
+                    ./install-rancher-server #{server_version} #{project_root}
                 SHELL
 
             else
                 node.vm.provision 'shell', inline: <<-SHELL
                     cd "#{project_root}"/utility
-                    ./install-rancher-agent #{agent_version} #{server_port}
+                    ./install-rancher-agent #{agent_version} #{server_port} #{project_root}
                 SHELL
             end
         end
