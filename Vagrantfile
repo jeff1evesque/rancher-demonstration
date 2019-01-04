@@ -16,6 +16,7 @@ server_version   = 'v1.6.25'
 docker_version   = '18.09.0'
 server_ip        = '192.168.0.30'
 agent_ip         = '192.168.0.31'
+server_port      = '7890'
 
 ## install vagrant plugins
 required_plugins.each do |plugin|
@@ -62,7 +63,7 @@ Vagrant.configure(2) do |config|
 
             ## pre-docker dependencies
             if machine[:hostname] == 'rancher-server'
-                node.vm.network 'forwarded_port', guest: 8080, host: 7890
+                node.vm.network 'forwarded_port', guest: 8080, host: server_port
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo yum install -y dos2unix
                 SHELL
@@ -91,7 +92,7 @@ Vagrant.configure(2) do |config|
             else
                 node.vm.provision 'shell', inline: <<-SHELL
                     cd "#{project_root}"/utility
-                    ./install-rancher-agent #{agent_version}
+                    ./install-rancher-agent #{agent_version} #{server_port}
                 SHELL
             end
         end
