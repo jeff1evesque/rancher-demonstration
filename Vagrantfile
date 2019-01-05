@@ -45,7 +45,7 @@ servers=[
     :ip => agent_ip,
     :box => 'ubuntu/bionic64',
     :ram => 2048,
-    :cpu => 4
+    :cpu => 2
   }
 ]
 
@@ -61,10 +61,6 @@ Vagrant.configure(2) do |config|
                 vb.customize ['modifyvm', :id, '--memory', machine[:ram]]
             end
 
-            ## shared files + folders
-            node.vm.synced_folder './', '/vagrant',
-                mount_options: ['dmode=755', 'fmode=664']
-
             ## pre-docker dependencies
             if machine[:hostname] == 'rancher-server'
                 node.vm.network 'forwarded_port', guest: 8080, host: server_port
@@ -79,9 +75,9 @@ Vagrant.configure(2) do |config|
 
             ## utility executable: install docker + rancher-cli
             node.vm.provision 'shell', inline: <<-SHELL
-                dos2unix "#{project_root}"/utility/*
-                chmod u+x "#{project_root}"/utility/*
-                cd "#{project_root}"/utility
+                dos2unix "#{project_root}/utility/*"
+                chmod u+x "#{project_root}/utility/*"
+                cd "#{project_root}/utility"
                 ./install-docker #{docker_version}
                 ./install-rancher-cli
             SHELL
@@ -89,13 +85,13 @@ Vagrant.configure(2) do |config|
             ## install rancher server + agent
             if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
-                    cd "#{project_root}"/utility
+                    cd "#{project_root}/utility"
                     ./install-rancher-server #{server_version} #{project_root}
                 SHELL
 
             else
                 node.vm.provision 'shell', inline: <<-SHELL
-                    cd "#{project_root}"/utility
+                    cd "#{project_root}/utility"
                     ./install-rancher-agent #{agent_version} #{server_port} #{project_root}
                 SHELL
             end
