@@ -52,6 +52,7 @@ servers=[
 ## create vbox machines
 Vagrant.configure(2) do |config|
     servers.each do |machine|
+        ## shared files + folders
         config.vm.define machine[:hostname] do |node|
             ## virtualbox configurations
             node.vm.box = machine[:box]
@@ -86,7 +87,7 @@ Vagrant.configure(2) do |config|
             if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
                     cd "#{project_root}/utility"
-                    ./install-rancher-server #{server_version} #{project_root}
+                    ./install-rancher-server #{server_version}
                 SHELL
 
             else
