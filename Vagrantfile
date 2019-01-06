@@ -98,7 +98,7 @@ Vagrant.configure(2) do |config|
             else
                 node.vm.provision 'shell', inline: <<-SHELL
                     cd "#{project_root}/utility"
-                    ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port} #{project_root}
+                    ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port}
                 SHELL
             end
         end

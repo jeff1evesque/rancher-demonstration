@@ -4,7 +4,6 @@
 AGENT_VERSION="$1"
 SERVER_IP="$2"
 RANCHER_PORT="$3"
-BASEDIR="$4"
 SLEEP_TIME='300'
 OPERATING_SYSTEM=$(uname -s)
 
@@ -84,7 +83,7 @@ if [ "$ACCESS" ]; then
         REGISTER=$(
             curl -v -H 'Accept: application/json' \
             -H 'Content-Type: application/json' \
-            "$RANCHER_URL"/v2-beta/projects/1a5/registrationTokens
+            "$RANCHER_URL"/v2-beta/projects/1a5/registrationtokens
         )
 
         STATE=$(echo "$REGISTER" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["data"][0]["state"])')
@@ -120,6 +119,7 @@ RANCHER_ACCESS_KEY=$(echo "$ACCESS" | python3 -c 'import json,sys;obj=json.load(
 RANCHER_SECRET_KEY=$(echo "$ACCESS" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["secretValue"])')
 
 ## initial login creates '~/.rancher/cli2.json'
+mkdir -p ~/.rancher
 rancher login "$RANCHER_URL" -t "$TOKEN"
 
 ##
