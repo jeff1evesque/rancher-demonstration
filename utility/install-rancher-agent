@@ -119,6 +119,9 @@ fi
 RANCHER_ACCESS_KEY=$(echo "$ACCESS" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["name"])')
 RANCHER_SECRET_KEY=$(echo "$ACCESS" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["secretValue"])')
 
+## initial login creates '~/.rancher/cli2.json'
+rancher login "$RANCHER_URL" -t "$TOKEN"
+
 ##
 ## @environment: must contain user account id:
 ##
