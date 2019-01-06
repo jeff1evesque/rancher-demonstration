@@ -8,15 +8,16 @@
 ##
 ##       required_plugins = %w(plugin1 plugin2 plugin3)
 ##
-required_plugins = %w(vagrant-vbguest)
-plugin_installed = false
-project_root     = '/vagrant'
-agent_version    = 'v1.2.11'
-server_version   = 'v1.6.25'
-docker_version   = '18.09.0'
-server_ip        = '192.168.0.30'
-agent_ip         = '192.168.0.31'
-server_port      = '7890'
+required_plugins     = %w(vagrant-vbguest)
+plugin_installed     = false
+project_root         = '/vagrant'
+agent_version        = 'v1.2.11'
+server_version       = 'v1.6.25'
+docker_version       = '18.09.0'
+server_ip            = '192.168.0.30'
+agent_ip             = '192.168.0.31'
+server_port          = '7890'
+server_internal_port = '7895'
 
 ## install vagrant plugins
 required_plugins.each do |plugin|
@@ -64,7 +65,7 @@ Vagrant.configure(2) do |config|
 
             ## pre-docker dependencies
             if machine[:hostname] == 'rancher-server'
-                node.vm.network 'forwarded_port', guest: 8080, host: server_port
+                node.vm.network :forwarded_port, guest: server_internal_port, host: server_port
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo yum install -y dos2unix
                 SHELL
@@ -86,14 +87,18 @@ Vagrant.configure(2) do |config|
             ## install rancher server + agent
             if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
+                    systemctl enable firewalld
+                    systemctl start firewalld
+                    firewall-cmd --zone=public --permanent --add-port=#{server_internal_port}/tcp
+                    firewall-cmd --reload
                     cd "#{project_root}/utility"
-                    ./install-rancher-server #{server_version}
+                    ./install-rancher-server #{server_version} #{server_internal_port}
                 SHELL
 
             else
                 node.vm.provision 'shell', inline: <<-SHELL
                     cd "#{project_root}/utility"
-                    ./install-rancher-agent #{agent_version} #{server_port} #{project_root}
+                    ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port} #{project_root}
                 SHELL
             end
         end
