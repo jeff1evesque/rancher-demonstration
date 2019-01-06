@@ -87,12 +87,12 @@ Vagrant.configure(2) do |config|
             ## install rancher server + agent
             if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
+                    cd "#{project_root}/utility"
+                    ./install-rancher-server #{server_version} #{server_internal_port}
                     systemctl enable firewalld
                     systemctl start firewalld
                     firewall-cmd --zone=public --permanent --add-port=#{server_internal_port}/tcp
                     firewall-cmd --reload
-                    cd "#{project_root}/utility"
-                    ./install-rancher-server #{server_version} #{server_internal_port}
                 SHELL
 
             else
