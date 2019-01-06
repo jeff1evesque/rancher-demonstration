@@ -70,23 +70,6 @@ do
     fi
 done
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 if [ "$ACCESS" ]; then
     SLEEPER=0
     STATE='registering'
@@ -151,7 +134,7 @@ echo "{
     \"secretKey\":\"$RANCHER_SECRET_KEY\",
     \"url\":\"$RANCHER_URL\",
     \"environment\":\"1a5\"
-}" > ~/.rancher/cli.json
+}" > ~/.rancher/cli2.json
 
 if [ "$TOKEN" ]; then
     ##
