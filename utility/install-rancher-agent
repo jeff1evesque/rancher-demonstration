@@ -2,9 +2,13 @@
 
 ## local variables
 AGENT_VERSION="$1"
-SERVER_IP = $(<rancher_ip.txt)
+SERVER_IP="$2"
+RANCHER_PORT="$3"
+BASEDIR="$4"
 SLEEP_TIME='300'
 OPERATING_SYSTEM=$(uname -s)
+
+export RANCHER_URL="http://$SERVER_IP:$RANCHER_PORT"
 
 ## detect os
 case "${OPERATING_SYSTEM}" in
@@ -44,9 +48,6 @@ do
     ##
     ##     https://github.com/rancher/rancher/issues/4961#issuecomment-222598633
     ##
-    export RANCHER_URL="http://$SERVER_IP:$RANCHER_PORT"
-
-    ## access rancher server
     ACCESS=$(
         curl -v -XPOST -H 'Accept: application/json' \
         -H 'Content-Type: application/json' \
@@ -69,10 +70,22 @@ do
     fi
 done
 
-##
-## discontinue error detection
-##
-set +e
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if [ "$ACCESS" ]; then
     SLEEPER=0
@@ -120,6 +133,10 @@ if [ "$ACCESS" ]; then
     done
 fi
 
+RANCHER_ACCESS_KEY=$(echo "$ACCESS" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["name"])')
+RANCHER_SECRET_KEY=$(echo "$ACCESS" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["secretValue"])')
+
+##
 ## @environment: must contain user account id:
 ##
 ##     - 1a1, administrator
@@ -137,6 +154,7 @@ echo "{
 }" > ~/.rancher/cli.json
 
 if [ "$TOKEN" ]; then
+    ##
     ## rancher agent: legacy docker toolbox requires older 'boot2docker'.
     ##
     ##     - https://github.com/rancher/rancher/issues/10970#issuecomment-372061736
@@ -168,10 +186,5 @@ if [ "$TOKEN" ]; then
 
 else
     echo 'rancher registration token not generated'
-    exit 1
-fi
-
-else
-    echo 'please install docker per https://github.com/jeff1evesque/machine-learning#installation'
     exit 1
 fi
