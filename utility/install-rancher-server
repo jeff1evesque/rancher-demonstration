@@ -2,6 +2,7 @@
 
 ## local variables
 SERVER_VERSION="$1"
+SERVER_PORT="$2"
 RANCHER_CONTAINER='rancher'
 OPERATING_SYSTEM=$(uname -s)
 
@@ -28,5 +29,5 @@ esac
 sudo docker run -d \
     --name "$RANCHER_CONTAINER" \
     --restart=unless-stopped \
-    -p 8080:8080 \
+    -p "$SERVER_PORT":8080 \
     rancher/server:"$SERVER_VERSION"
