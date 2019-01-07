@@ -77,8 +77,8 @@ Vagrant.configure(2) do |config|
 
             ## utility executable: install docker + rancher-cli
             node.vm.provision 'shell', inline: <<-SHELL
-                dos2unix "#{project_root}/utility/*"
-                chmod u+x "#{project_root}/utility/*"
+                dos2unix #{project_root}/utility/*
+                chmod u+x #{project_root}/utility/*
                 cd "#{project_root}/utility"
                 ./install-docker #{docker_version}
                 ./install-rancher-cli
@@ -87,7 +87,7 @@ Vagrant.configure(2) do |config|
             ## install rancher server + agent
             if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
-                    cd "#{project_root}/utility"
+                    cd #{project_root}/utility
                     ./install-rancher-server #{server_version} #{server_internal_port}
                     systemctl enable firewalld
                     systemctl start firewalld
