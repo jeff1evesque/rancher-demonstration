@@ -8,6 +8,7 @@ SLEEP_TIME='300'
 OPERATING_SYSTEM=$(uname -s)
 
 export RANCHER_URL="http://$SERVER_IP:$RANCHER_PORT"
+RANCHER_URL="http://$SERVER_IP:$RANCHER_PORT"
 
 ## detect os
 case "${OPERATING_SYSTEM}" in
