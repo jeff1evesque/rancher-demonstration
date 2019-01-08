@@ -13,7 +13,8 @@ plugin_installed     = false
 project_root         = '/vagrant'
 agent_version        = 'v1.2.11'
 server_version       = 'v1.6.25'
-docker_version       = '18.09.0'
+docker_version_c     = '18.09.0'
+docker_version_u     = '18.06.1'
 server_ip            = '192.168.0.30'
 agent_ip             = '192.168.0.31'
 server_port          = '7890'
@@ -79,8 +80,7 @@ Vagrant.configure(2) do |config|
             node.vm.provision 'shell', inline: <<-SHELL
                 dos2unix #{project_root}/utility/*
                 chmod u+x #{project_root}/utility/*
-                cd "#{project_root}/utility"
-                ./install-docker #{docker_version}
+                cd #{project_root}/utility
                 ./install-rancher-cli
             SHELL
 
@@ -88,6 +88,7 @@ Vagrant.configure(2) do |config|
             if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
                     cd #{project_root}/utility
+                    ./install-docker #{docker_version_c}
                     ./install-rancher-server #{server_version} #{server_internal_port}
                     systemctl enable firewalld
                     systemctl start firewalld
@@ -97,7 +98,8 @@ Vagrant.configure(2) do |config|
 
             else
                 node.vm.provision 'shell', inline: <<-SHELL
-                    cd "#{project_root}/utility"
+                    cd #{project_root}/utility
+                    ./install-docker #{docker_version_u}
                     ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port}
                 SHELL
             end
