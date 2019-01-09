@@ -39,7 +39,7 @@ servers=[
     :hostname => 'rancher-server',
     :ip => server_ip,
     :box => 'centos/7',
-    :ram => 3072,
+    :ram => 4096,
     :cpu => 4
   },
   {
@@ -87,6 +87,7 @@ Vagrant.configure(2) do |config|
             ## install rancher server + agent
             if machine[:hostname] == 'rancher-server'
                 node.vm.provision 'shell', inline: <<-SHELL
+                    sudo yum -y update
                     cd #{project_root}/utility
                     ./install-docker #{docker_version_c}
                     ./install-rancher-server #{server_version} #{server_internal_port}
@@ -98,6 +99,7 @@ Vagrant.configure(2) do |config|
 
             else
                 node.vm.provision 'shell', inline: <<-SHELL
+                    sudo apt-get -y update
                     cd #{project_root}/utility
                     ./install-docker #{docker_version_u}
                     ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port}
