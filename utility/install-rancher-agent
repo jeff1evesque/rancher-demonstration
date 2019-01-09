@@ -6,8 +6,6 @@ SERVER_IP="$2"
 RANCHER_PORT="$3"
 SLEEP_TIME='300'
 OPERATING_SYSTEM=$(uname -s)
-
-export RANCHER_URL="http://$SERVER_IP:$RANCHER_PORT"
 RANCHER_URL="http://$SERVER_IP:$RANCHER_PORT"
 
 ## detect os
@@ -48,21 +46,7 @@ do
     ##
     ##     https://github.com/rancher/rancher/issues/4961#issuecomment-222598633
     ##
-    ACCESS=$(
-        curl -v -XPOST -H 'Accept: application/json' \
-        -H 'Content-Type: application/json' \
-        -d '{
-            "type":"apikey",
-            "accountId":"1a1",
-            "name":"admin",
-            "description":null,
-            "created":null,
-            "kind":null,
-            "removed":null,
-            "uuid":null
-        }' \
-        "$RANCHER_URL"/v2-beta/apikeys
-    ) && break
+    ACCESS=$(curl -k "$RANCHER_URL"/ping) && break
 
     if [ "$SLEEPER" = "$SLEEP_TIME" ]; then
         echo -e "\nSleep time ${SLEEP_TIME}s exceeded, install terminating.\n"
@@ -70,108 +54,33 @@ do
     fi
 done
 
-if [ "$ACCESS" ]; then
-    SLEEPER=0
-    STATE='registering'
+## login
+LOGINRESPONSE=$(curl -s "${RANCHER_URL}/v3-public/localProviders/local?action=login" -H 'content-type: application/json' --data-binary '{"username":"admin","password":"admin"}' --insecure)
+echo -e "\n\nLOGINRESPONSE: ${LOGINRESPONSE}\n\n"
+LOGINTOKEN=$(echo "$LOGINRESPONSE" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["token"])')
 
-    ## post method creates new resource
-    curl -v -XPOST -H 'Accept: application/json' \
-        -H 'Content-Type: application/json' \
-        "$RANCHER_URL"/v2-beta/projects/1a5/registrationTokens
+## change password
+curl -s "${RANCHER_URL}/v3/users?action=changepassword" \
+    -H 'content-type: application/json' \
+    -H "Authorization: Bearer $LOGINTOKEN" \
+    --data-binary '{"currentPassword": "admin", "newPassword": "newpassword"}'
+    --insecure
 
-    while true
-    do
-        REGISTER=$(
-            curl -v -H 'Accept: application/json' \
-            -H 'Content-Type: application/json' \
-            "$RANCHER_URL"/v2-beta/projects/1a5/registrationtokens
-        )
+## create API key
+APIRESPONSE=$(curl -s "$RANCHER_URL/v3/token" -H 'content-type: application/json' -H "Authorization: Bearer $LOGINTOKEN" --data-binary '{"type":"token","description":"automation"}' --insecure)
 
-        STATE=$(echo "$REGISTER" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["data"][0]["state"])')
+## Extract and store token
+echo -e "\n\nAPIRESPONSE: ${APIRESPONSE}\n\n"
+APITOKEN=$(echo "$APIRESPONSE" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["token"])')
 
-        if [ "${STATE,,}" = 'active' ]; then
-            TOKEN=$(echo "$REGISTER" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["data"][0]["token"])')
-            break
 
-        elif [ "$SLEEPER" = 60 ]; then
-            echo ''
-            echo 'Waited over 60s for active state.'
-            echo ''
-            echo '[Y]: yes, keep waiting'
-            echo '[N]: no, exit installation'
-            echo ''
-            read -rp 'Choice: ' TOKEN_STATUS
 
-            if [ "${TOKEN_STATUS,,}" = 'n' ]; then
-                exit 1
-            else
-                SLEEPER=$((SLEEPER+2))
-                sleep 2
-            fi
+# create cluster
+CLUSTERRESPONSE=$(curl -s "$RANCHER_URL/v3/cluster" -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --data-binary '{"dockerRootDir":"/var/lib/docker","enableNetworkPolicy":false,"type":"cluster","rancherKubernetesEngineConfig":{"addonJobTimeout":30,"ignoreDockerVersion":true,"sshAgentAuth":false,"type":"rancherKubernetesEngineConfig","authentication":{"type":"authnConfig","strategy":"x509"},"network":{"type":"networkConfig","plugin":"canal"},"ingress":{"type":"ingressConfig","provider":"nginx"},"monitoring":{"type":"monitoringConfig","provider":"metrics-server"},"services":{"type":"rkeConfigServices","kubeApi":{"podSecurityPolicy":false,"type":"kubeAPIService"},"etcd":{"snapshot":false,"type":"etcdService","extraArgs":{"heartbeat-interval":500,"election-timeout":5000}}}},"name":"yournewcluster"}' --insecure)
 
-        else
-            SLEEPER=$((SLEEPER+2))
-            sleep 2
-        fi
-    done
-fi
+# Extract clusterid to use for generating the docker run command
+echo -e "\n\nCLUSTERRESPONSE: ${CLUSTERRESPONSE}\n\n"
+CLUSTERID=$(echo $CLUSTERRESPONSE | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["id"])')
 
-RANCHER_ACCESS_KEY=$(echo "$ACCESS" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["name"])')
-RANCHER_SECRET_KEY=$(echo "$ACCESS" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["secretValue"])')
-
-## initial login creates '~/.rancher/cli2.json'
-mkdir -p ~/.rancher
-rancher login "$RANCHER_URL" -t "$TOKEN"
-
-##
-## @environment: must contain user account id:
-##
-##     - 1a1, administrator
-##     - 1a5, default environment
-##
-## Note: rancher host registration can "also" be validated against:
-##
-##     - $RANCHER_URL/env/1a5/infra/hosts/add?driver=custom
-##
-echo "{
-    \"accessKey\":\"$RANCHER_ACCESS_KEY\",
-    \"secretKey\":\"$RANCHER_SECRET_KEY\",
-    \"url\":\"$RANCHER_URL\",
-    \"environment\":\"1a5\"
-}" > ~/.rancher/cli2.json
-
-if [ "$TOKEN" ]; then
-    ##
-    ## rancher agent: legacy docker toolbox requires older 'boot2docker'.
-    ##
-    ##     - https://github.com/rancher/rancher/issues/10970#issuecomment-372061736
-    ##     - https://github.com/jeff1evesque/machine-learning/issues/2935#issuecomment-372060078
-    ##     - https://github.com/jeff1evesque/machine-learning/issues/2935#issuecomment-372061391
-    ##
-    if [ "$DISTRO_TYPE" = 'windows' ] && [ "$WINDOWS_CURRENT_VERSION" -le "$WINDOWS_VERSION" ]; then
-        docker-machine \
-            create \
-            -d virtualbox \
-            --virtualbox-boot2docker-url="$BOOT2DOCKER_REPO"/releases/download/v17.09.1-ce/boot2docker.iso \
-            rancher
-
-        docker-machine.exe env rancher
-        eval "$('C:\Program Files\Docker Toolbox\docker-machine.exe' env rancher)"
-    fi
-
-    ## create docker volumes
-    mkdir -p ./interface/static/{js,css}
-
-    ## register host with rancher
-    sudo docker run \
-        --rm \
-        --privileged \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        -v /var/lib/rancher:/var/lib/rancher \
-        rancher/agent:"$AGENT_VERSION" \
-        "$RANCHER_URL/v1/scripts/$TOKEN"
-
-else
-    echo 'rancher registration token not generated'
-    exit 1
-fi
+# Create token
+curl -s "$RANCHER_URL/v3/clusterregistrationtoken" -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --data-binary '{"type":"clusterRegistrationToken","clusterId":"'$CLUSTERID'"}' --insecure > /dev/null
