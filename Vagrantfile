@@ -8,17 +8,19 @@
 ##
 ##       required_plugins = %w(plugin1 plugin2 plugin3)
 ##
-required_plugins     = %w(vagrant-vbguest)
-plugin_installed     = false
-project_root         = '/vagrant'
-agent_version        = 'v1.2.11'
-server_version       = 'v2.1.5'
-docker_version_c     = '18.09.0'
-docker_version_u     = '18.06.1*'
-server_ip            = '192.168.0.30'
-agent_ip             = '192.168.0.31'
-server_port          = '7890'
-server_internal_port = '7895'
+required_plugins           = %w(vagrant-vbguest)
+plugin_installed           = false
+project_root               = '/vagrant'
+agent_version              = 'v1.2.11'
+server_version             = 'v2.1.5'
+docker_version_c           = '18.09.0'
+docker_version_u           = '18.06.1*'
+server_ip                  = '192.168.0.30'
+agent_ip                   = '192.168.0.31'
+server_port                = '7890'
+server_https_port          = '7895'
+server_internal_port       = '8890'
+server_internal_https_port = '8895'
 
 ## install vagrant plugins
 required_plugins.each do |plugin|
@@ -67,6 +69,7 @@ Vagrant.configure(2) do |config|
             ## pre-docker dependencies
             if machine[:hostname] == 'rancher-server'
                 node.vm.network :forwarded_port, guest: server_internal_port, host: server_port
+                node.vm.network :forwarded_port, guest: server_internal_https_port, host: server_https_port
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo yum install -y dos2unix
                 SHELL
@@ -90,10 +93,11 @@ Vagrant.configure(2) do |config|
                     sudo yum -y update
                     cd #{project_root}/utility
                     ./install-docker #{docker_version_c}
-                    ./install-rancher-server #{server_version} #{server_internal_port}
+                    ./install-rancher-server #{server_version} #{server_internal_port} #{server_internal_https_port}
                     systemctl enable firewalld
                     systemctl start firewalld
                     firewall-cmd --zone=public --permanent --add-port=#{server_internal_port}/tcp
+                    firewall-cmd --zone=public --permanent --add-port=#{server_internal_https_port}/tcp
                     firewall-cmd --reload
                 SHELL
 
@@ -102,7 +106,7 @@ Vagrant.configure(2) do |config|
                     sudo apt-get -y update
                     cd #{project_root}/utility
                     ./install-docker #{docker_version_u}
-                    ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port}
+#                   ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port}
                 SHELL
             end
         end
