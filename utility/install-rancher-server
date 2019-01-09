@@ -30,4 +30,4 @@ sudo docker run -d \
     --name "$RANCHER_CONTAINER" \
     --restart=unless-stopped \
     -p "$SERVER_PORT":8080 \
-    rancher/server:"$SERVER_VERSION"
+    rancher/rancher:"$SERVER_VERSION"
