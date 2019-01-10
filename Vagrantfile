@@ -81,10 +81,11 @@ Vagrant.configure(2) do |config|
 
             ## utility executable: install docker + rancher-cli
             node.vm.provision 'shell', inline: <<-SHELL
+                mkdir #{project_root}/logs
                 dos2unix #{project_root}/utility/*
                 chmod u+x #{project_root}/utility/*
                 cd #{project_root}/utility
-                ./install-rancher-cli
+                ./install-rancher-cli >> #{project_root}/logs/install-rancher-cli.txt 2>&1
             SHELL
 
             ## install rancher server + agent
@@ -92,8 +93,8 @@ Vagrant.configure(2) do |config|
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo yum -y update
                     cd #{project_root}/utility
-                    ./install-docker #{docker_version_c}
-                    ./install-rancher-server #{server_version} #{server_internal_port} #{server_internal_https_port}
+                    ./install-docker #{docker_version_c} >> #{project_root}/logs/install-docker.txt 2>&1
+                    ./install-rancher-server #{server_version} #{server_internal_port} #{server_internal_https_port} >> #{project_root}/logs/install-rancher-server.txt 2>&1
                     systemctl enable firewalld
                     systemctl start firewalld
                     firewall-cmd --zone=public --permanent --add-port=#{server_internal_port}/tcp
@@ -105,8 +106,8 @@ Vagrant.configure(2) do |config|
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo apt-get -y update
                     cd #{project_root}/utility
-                    ./install-docker #{docker_version_u}
-#                   ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port}
+                    ./install-docker #{docker_version_u} >> #{project_root}/logs/install-docker.txt 2>&1
+                    ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port} >> #{project_root}/logs/install-rancher-agent.txt 2>&1
                 SHELL
             end
         end
