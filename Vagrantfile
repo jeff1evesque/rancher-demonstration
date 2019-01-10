@@ -81,7 +81,7 @@ Vagrant.configure(2) do |config|
 
             ## utility executable: install docker + rancher-cli
             node.vm.provision 'shell', inline: <<-SHELL
-                mkdir #{project_root}/logs
+                mkdir -p #{project_root}/logs
                 dos2unix #{project_root}/utility/*
                 chmod u+x #{project_root}/utility/*
                 cd #{project_root}/utility
