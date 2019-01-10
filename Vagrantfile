@@ -93,7 +93,7 @@ Vagrant.configure(2) do |config|
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo yum -y update
                     cd #{project_root}/utility
-                    ./install-docker #{docker_version_c} >> #{project_root}/logs/install-docker.txt 2>&1
+                    ./install-docker #{docker_version_c} >> #{project_root}/logs/install-docker-centos7.txt 2>&1
                     ./install-rancher-server #{server_version} #{server_internal_port} #{server_internal_https_port} >> #{project_root}/logs/install-rancher-server.txt 2>&1
                     systemctl enable firewalld
                     systemctl start firewalld
@@ -106,7 +106,7 @@ Vagrant.configure(2) do |config|
                 node.vm.provision 'shell', inline: <<-SHELL
                     sudo apt-get -y update
                     cd #{project_root}/utility
-                    ./install-docker #{docker_version_u} >> #{project_root}/logs/install-docker.txt 2>&1
+                    ./install-docker #{docker_version_u} >> #{project_root}/logs/install-docker-xenial.txt 2>&1
                     ./install-rancher-agent #{agent_version} #{server_ip} #{server_internal_port} >> #{project_root}/logs/install-rancher-agent.txt 2>&1
                 SHELL
             end
