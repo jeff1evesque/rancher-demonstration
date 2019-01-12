@@ -48,7 +48,7 @@ do
     ##
     ##     https://github.com/rancher/rancher/issues/4961#issuecomment-222598633
     ##
-    ACCESS=$(curl -k "http://${RANCHER_URL}/ping") && break
+    curl -k "${RANCHER_URL}/ping" && break
 
     if [ "$SLEEPER" = "$SLEEP_TIME" ]; then
         echo -e "\nSleep time ${SLEEP_TIME}s exceeded, install terminating.\n"
@@ -56,13 +56,11 @@ do
     fi
 done
 
-echo '2'
 ## login
-LOGINRESPONSE=$(curl -s "${RANCHER_URL_HTTPS}/v3-public/localProviders/local?action=login" -H 'content-type: application/json' --data-binary '{"username":"admin","password":"admin"}')
+LOGINRESPONSE=$(curl -s "${RANCHER_URL_HTTPS}/v3-public/localProviders/local?action=login" -H 'content-type: application/json' --data-binary '{"username":"admin","password":"admin"}' --insecure)
 echo -e "\n\nLOGINRESPONSE: ${LOGINRESPONSE}\n\n"
-LOGINTOKEN=$(echo "$LOGINRESPONSE}" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["token"])')
+LOGINTOKEN=$(echo "$LOGINRESPONSE" | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["token"])')
 
-echo '3'
 ## change password
 curl -s "${RANCHER_URL_HTTPS}/v3/users?action=changepassword" \
     -H 'content-type: application/json' \
