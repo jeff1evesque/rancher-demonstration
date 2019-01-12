@@ -80,7 +80,7 @@ CLUSTERRESPONSE=$(curl -s "${RANCHER_URL_HTTPS}/v3/cluster" -H 'content-type: ap
 echo -e "\n\nCLUSTERRESPONSE: ${CLUSTERRESPONSE}\n\n"
 
 # Extract clusterid to use for generating the docker run command
-CLUSTERID=$(echo $CLUSTERRESPONSE | python3 -c 'import json,sys;obj=json.load(sys.stdin)
+CLUSTERID=$(echo $CLUSTERRESPONSE | python3 -c 'import json,sys;obj=json.load(sys.stdin))
 
 # Create token
 curl -s "${RANCHER_URL_HTTPS}/v3/clusterregistrationtoken" -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --data-binary '{"type":"clusterRegistrationToken","clusterId":"'$CLUSTERID'"}' --insecure > /dev/null
@@ -89,7 +89,9 @@ curl -s "${RANCHER_URL_HTTPS}/v3/clusterregistrationtoken" -H 'content-type: app
 ROLEFLAGS="--etcd --controlplane --worker"
 
 # Generate nodecommand
-AGENTCMD=$(curl -s "${RANCHER_URL}/v3/clusterregistrationtoken?id='$CLUSTERID'" -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --insecure | jq -r '.data[].nodeCommand' | head -1)
+#AGENTCMD=$(curl -s "${RANCHER_URL}/v3/clusterregistrationtoken?id='$CLUSTERID'" -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --insecure | jq -r '.data[].nodeCommand' | head -1)
+AGENTCMD=$(curl -s "${RANCHER_URL}/v3/clusterregistrationtoken?id='$CLUSTERID'" -H 'content-type: application/json' -H "Authorization: Bearer $APITOKEN" --insecure)
+echo "AGENTCMD: $AGENTCMD"
 
 # Concat commands
 DOCKERRUNCMD="$AGENTCMD $ROLEFLAGS"
