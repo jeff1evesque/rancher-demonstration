@@ -65,7 +65,7 @@ LOGINTOKEN=$(echo "$LOGINRESPONSE" | python3 -c 'import json,sys;obj=json.load(s
 curl -s "${RANCHER_URL_HTTPS}/v3/users?action=changepassword" \
     -H 'content-type: application/json' \
     -H "Authorization: Bearer $LOGINTOKEN" \
-    --data-binary '{"currentPassword": "admin", "newPassword": "newpassword"}'
+    --data-binary '{"currentPassword": "admin", "newPassword": "newpassword"}' \
     --insecure
 
 ## create API key
