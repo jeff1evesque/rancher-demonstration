@@ -77,7 +77,7 @@ vagrant up
 **Note:** an alternative syntax to `vagrant up`, is to run `vagrant up rancher-server`.
  However, the associated `rancher-agent` needs to be created as well.
 
-Depending on the network speed, the build can take between 10-15 minutes. So,
+Depending on the network speed, the build can take between 2-4 minutes. So,
  grab a cup of coffee, and perhaps enjoy a danish while the virtual machine
  builds.
 
