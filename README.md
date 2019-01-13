@@ -2,8 +2,8 @@
 
 This repository is a simple demonstration of virtualized environments
  ([vagrant](https://www.vagrantup.com/) + [virtualbox](https://www.virtualbox.org/)),
- tailored to exhibit the [rancher-server](https://github.com/rancher/rancher)
- / [rancher-agent](https://github.com/rancher/agent) ecosystem.
+ tailored to exhibit the [kubernetes](https://kubernetes.io/)-based
+ [rancher-server](https://github.com/rancher/rancher), and [rancher-agent](https://github.com/rancher/agent) ecosystem.
  Specifically, a [`Vagrantfile`](https://github.com/jeff1evesque/rancher-demonstration/blob/master/Vagrantfile) will automate the processes contained within
  the provided [install scripts](https://github.com/jeff1evesque/rancher-demonstration/tree/master/utility).
 
