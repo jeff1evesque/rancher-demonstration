@@ -35,13 +35,13 @@ Upon immediate login, we may notice the rancher-server still be provisioning:
 
 After a few minutes, the cluster will complete provisioning, and active:
 
-[Rancher Active](https://user-images.githubusercontent.com/2907085/51079860-cd352700-169d-11e9-859a-5dc6ce9f6d39.PNG)
+![Rancher Active](https://user-images.githubusercontent.com/2907085/51079860-cd352700-169d-11e9-859a-5dc6ce9f6d39.PNG)
 
 ---
 
 Then, the newly created cluster can be reviewed:
 
-[Rancher Cluster](https://user-images.githubusercontent.com/2907085/51079869-e8a03200-169d-11e9-96c6-457ec62fb695.PNG)
+![Rancher Cluster](https://user-images.githubusercontent.com/2907085/51079869-e8a03200-169d-11e9-96c6-457ec62fb695.PNG)
 
 ## Configuration
 
