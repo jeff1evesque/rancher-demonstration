@@ -16,24 +16,25 @@ In this setup, the [rancher-server](https://github.com/jeff1evesque/rancher-demo
 
 Regardless of implementation, when vagrant completes provisioning, a rancher-server,
  is available via https://localhost:7895, and can be used to manage various
- [kubernetes](https://kubernetes.io/) based clusters:
+ [kubernetes](https://kubernetes.io/)-based clusters:
 
 ![Rancher Login](https://user-images.githubusercontent.com/2907085/51079846-69126300-169d-11e9-9c06-6da88c38a0df.PNG)
 
 ---
 
-Upon immediate login, we may notice the rancher-server still be provisioning:
+Upon immediate login, the rancher-server may still be provisioning:
 
 ![Rancher Provisioning](https://user-images.githubusercontent.com/2907085/51079851-a5de5a00-169d-11e9-8ee0-087483ffbff0.PNG)
 
 **Note:** the provided [install scripts](https://github.com/jeff1evesque/rancher-demonstration/tree/master/utility),
  used to provision the corresponding vagrant virtual machine(s), can also be
- used on production-like environments, just remember to replace the default ssl
- keys, along with other system specific configurations.
+ used on production-like environments. However, for [high-availability](https://rancher.com/docs/rancher/v2.x/en/installation/ha/),
+ the [install-rancher-server](https://github.com/jeff1evesque/rancher-demonstration/blob/master/utility/install-rancher-server)
+ will need to be adjusted.
 
 ---
 
-After a few minutes, the cluster will complete provisioning, and active:
+After a few minutes, the cluster will complete provisioning, and be active:
 
 ![Rancher Active](https://user-images.githubusercontent.com/2907085/51079860-cd352700-169d-11e9-859a-5dc6ce9f6d39.PNG)
 
@@ -65,7 +66,7 @@ In order to proceed with the installation for this project, three dependencies
 - [Extension Pack x.y.z](http://download.virtualbox.org/virtualbox/5.1.2/) (required)
 
 Once the necessary dependencies have been installed, execute the following
- command to build the puppetserver:
+ command to build the rancher-server:
 
 ```bash
 cd /path/to/rancher-demonstration/
@@ -88,14 +89,14 @@ Though, the implemented [install scripts](https://github.com/jeff1evesque/ranche
  can easily be run on corresponding virtual machines:
 
 ```bash
-## virtual machine for puppetserver
+## virtual machine for rancher-server
 ./install-rancher-server \
   "$server_version" \
   "$server_internal_port" \
   "$server_internal_https_port" \
 >> "${project_root}/logs/install-rancher-server.txt" 2>&1
 
-## virual machine for puppetagent
+## virtual machine for rancher-agent
 ./install-rancher-agent \
   "$agent_version" \
   "$server_ip" \
