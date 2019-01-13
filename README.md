@@ -10,7 +10,7 @@ This repository is a simple demonstration of virtualized environments
 In this setup, the [rancher-server](https://github.com/jeff1evesque/rancher-demonstration/blob/master/utility/install-rancher-server)
  is launched using [Centos7x](https://github.com/jeff1evesque/rancher-demonstration/blob/1959f5817ca53d89c8d3349d3bb23406c3bf3ea6/Vagrantfile#L40-L46),
  while the [rancher-agent](https://github.com/jeff1evesque/rancher-demonstration/blob/master/utility/install-rancher-agent)
- is launched in [Xenial64](https://github.com/jeff1evesque/rancher-demonstration/blob/1959f5817ca53d89c8d3349d3bb23406c3bf3ea6/Vagrantfile#L47-L53).
+ is launched in [Bionic64](https://github.com/jeff1evesque/rancher-demonstration/blob/1959f5817ca53d89c8d3349d3bb23406c3bf3ea6/Vagrantfile#L47-L53).
  If the rancher-server needs to be debian-based, or corresponding rancher-agents
  need to be rhel-based, then additional utility scripts, not included in this
  repository, will need to be created.
