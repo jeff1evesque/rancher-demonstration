@@ -109,4 +109,4 @@ Though, the implemented [install scripts](https://github.com/jeff1evesque/ranche
 **Note:** when running the above [install scripts](https://github.com/jeff1evesque/rancher-demonstration/tree/master/utility),
  it is assumed that [docker](https://github.com/jeff1evesque/rancher-demonstration/blob/master/utility/install-docker),
  and [rancher-cli](https://github.com/jeff1evesque/rancher-demonstration/blob/master/utility/install-rancher-cli)
- dependencies have been acounted.
+ dependencies have been accounted.
