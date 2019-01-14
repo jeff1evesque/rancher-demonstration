@@ -74,6 +74,9 @@ root@92dde0d45453:/var/lib/rancher# kubectl run \
   replicas=3
 ```
 
+**Notes:** if `--env=` is passed, environment variables can be read from STDIN
+using the standard env syntax.
+
 Additionally, a yaml configuration file can be utilized:
 
 ```bash
@@ -107,18 +110,68 @@ spec:
         app: nginx
     spec:
       containers:
-      - name: nginx
-        image: nginx:1.7.9
-        ports:
-        - containerPort: 80
+        - name: nginx
+          image: nginx:1.7.9
+          ports:
+          - containerPort: 80
+        env:
+        - name: DOMAIN
+          value: cluster
 ```
 
-**Note:** for development purposes, the `kind: Pod` can be implemented if non-vagrant
-`replicas` are implemented. However, in production systems, the `kind: Deployment` is
-typically implemented.
+**Note:** for development purposes, the `kind: Pod` can be implemented if
+`replicas` are not needed. However, in production systems, the `kind: Deployment`
+is typically desired.
 
 **Note:** [Kompose](http://kompose.io/user-guide/) can convert an existing
 `docker-compose.yml` to a series of kubernetes yaml files.
+
+Alternatively, instead of defining multiple environment variables for each yaml
+file, a custom [`configMapRef`](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables)
+can be created:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: special-config
+  namespace: default
+data:
+  DOMAIN: cluster
+```
+
+This allows the above `manifest.yaml` to refactor as follows:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+          - containerPort: 80
+        envFrom:
+          - configMapRef:
+            name: special-config
+            key: DOMAIN
+```
+
+**Note:** if the `envFrom` > `key` is omitted, the entire `special-config`,
+will be available within the given container.
 
 ## Configuration
 
