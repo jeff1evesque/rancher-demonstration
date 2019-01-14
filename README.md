@@ -74,7 +74,7 @@ root@92dde0d45453:/var/lib/rancher# kubectl run \
   replicas=3
 ```
 
-**Notes:** if `--env=` is passed, environment variables can be read from STDIN
+**Note:** if `--env=` is passed, environment variables can be read from STDIN
 using the standard env syntax.
 
 Additionally, a yaml configuration file can be utilized:
