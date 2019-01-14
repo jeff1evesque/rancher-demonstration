@@ -47,7 +47,7 @@ Then, the newly created cluster can be reviewed:
 
 ## Additional hosts
 
-Additional hosts can be added to a desired cluster, by first clicking edit
+Additional hosts can be added to a desired cluster, by first clicking *Edit*
 under the top-right hamburger icon:
 
 ![rancher-add-host](https://user-images.githubusercontent.com/2907085/51116143-446ed600-17d8-11e9-8642-97d82fc4d36e.PNG)
