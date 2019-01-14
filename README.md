@@ -131,6 +131,7 @@ file, a custom [`configMapRef`](https://kubernetes.io/docs/tasks/configure-pod-c
 can be created:
 
 ```yaml
+root@92dde0d45453:/var/lib/rancher# cat config/special_config.yml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -138,7 +139,15 @@ metadata:
   namespace: default
 data:
   DOMAIN: cluster
+root@92dde0d45453:/var/lib/rancher# kubectl create configmap special_config --from-file=config/special_config.yml
 ```
+
+**Note:** the [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
+API resource stores configuration data as key-value pairs. The data can be
+consumed in pods or provide the configurations for system components such as
+controllers. ConfigMap is similar to [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/),
+but provides a means of working with strings that don’t contain sensitive
+information.
 
 This allows the above `manifest.yaml` to refactor as follows:
 
