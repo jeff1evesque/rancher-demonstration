@@ -60,7 +60,7 @@ pasted into the desired cluster host:
 ## Deployment
 
 The `kubectl` command can be executed on the rancher-server via the web-browser,
-or directly within the container `docker exec -it rancher-server /bin/bash`.
+or directly within the container:
 
 ```bash
 [root@rancher-server vagrant]# docker ps -a
