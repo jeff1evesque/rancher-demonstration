@@ -45,6 +45,81 @@ Then, the newly created cluster can be reviewed:
 
 ![Rancher Cluster](https://user-images.githubusercontent.com/2907085/51079869-e8a03200-169d-11e9-96c6-457ec62fb695.PNG)
 
+## Additional hosts
+
+Additional hosts can be added to a desired cluster, by first clicking edit
+under the top-right hamburger icon:
+
+![rancher-add-host](https://user-images.githubusercontent.com/2907085/51116143-446ed600-17d8-11e9-8642-97d82fc4d36e.PNG)
+
+At the bottom of the associated page, the corresponding docker command can be
+pasted into the desired cluster host:
+
+![rancher-new-host-command](https://user-images.githubusercontent.com/2907085/51116220-8566ea80-17d8-11e9-9c8d-f0d223cb697f.PNG)
+
+## Deployment
+
+The `kubectl` command can be executed on the rancher-server via the web-browser,
+or directly within the container `docker exec -it rancher-server /bin/bash`.
+
+```bash
+[root@rancher-server vagrant]# docker ps -a
+CONTAINER ID        IMAGE                    COMMAND             CREATED             STATUS              PORTS                                                               NAMES
+92dde0d45453        rancher/rancher:v2.1.5   "entrypoint.sh"     38 hours ago        Up 38 hours         0.0.0.0:8890->80/tcp, 0.0                      .0.0:8895->443/tcp   rancher
+[root@rancher-server vagrant]# docker exec -it rancher /bin/bash
+root@92dde0d45453:/var/lib/rancher# kubectl run \
+  --image=nginx \
+  --port=80 \
+  --env='DOMAIN=cluster' \
+  replicas=3
+```
+
+Additionally, a yaml configuration file can be utilized:
+
+```bash
+[root@rancher-server vagrant]# docker ps -a
+CONTAINER ID        IMAGE                    COMMAND             CREATED             STATUS              PORTS                                                               NAMES
+92dde0d45453        rancher/rancher:v2.1.5   "entrypoint.sh"     38 hours ago        Up 38 hours         0.0.0.0:8890->80/tcp, 0.0                      .0.0:8895->443/tcp   rancher
+[root@rancher-server vagrant]# docker exec -it rancher /bin/bash
+root@92dde0d45453:/var/lib/rancher# kubectl create -f ./manifest.yaml
+root@92dde0d45453:/var/lib/rancher# kubectl get deployments
+NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   3         3         3            3           18s
+```
+
+The following is an example `manifest.yaml`:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+```
+
+**Note:** for development purposes, the `kind: Pod` can be implemented if non-vagrant
+`replicas` are implemented. However, in production systems, the `kind: Deployment` is
+typically implemented.
+
+**Note:** [Kompose](http://kompose.io/user-guide/) can convert an existing
+`docker-compose.yml` to a series of kubernetes yaml files.
+
 ## Configuration
 
 Fork this project in your GitHub account.  Then, clone your repository, with
@@ -110,15 +185,3 @@ can easily be run on corresponding virtual machines:
 it is assumed that [docker](https://github.com/jeff1evesque/rancher-demonstration/blob/master/utility/install-docker),
 and [rancher-cli](https://github.com/jeff1evesque/rancher-demonstration/blob/master/utility/install-rancher-cli)
 dependencies have been accounted.
-
-## Additional hosts
-
-Additional hosts can be added to a desired cluster, by first clicking 'edit'
-under the top-right hamburger icon:
-
-![rancher-add-host](https://user-images.githubusercontent.com/2907085/51116143-446ed600-17d8-11e9-8642-97d82fc4d36e.PNG)
-
-At the bottom of the associated page, the corresponding docker command can be
-pasted into the desired cluster host:
-
-![rancher-new-host-command](https://user-images.githubusercontent.com/2907085/51116220-8566ea80-17d8-11e9-9c8d-f0d223cb697f.PNG)
